@@ -1,0 +1,13 @@
+return {
+  __all = {
+    coverage = true
+  },
+  default = {
+    verbose = true
+  },
+  apiUnit = {
+    tags = "api",
+    ROOT = {"tests"},
+    verbose = true
+  }
+}
