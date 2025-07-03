@@ -1,11 +1,18 @@
-local nixessitycore = {}
-
-function nixessitycore:flake_output(flake_path)
-  return os.execute(
-    'nix eval --expr \'builtins.attrNames (builtins.getFlake "path:'
-      .. flake_path
-      .. '").outputs.packages.${builtins.currentSystem}\' --impure --json'
-  )
+local function flake_output(flake_path)
+  local process = require 'nixessitycore.process'
+  return process({
+    cmd = 'nix',
+    args = {
+      'eval',
+      '--expr',
+      'builtins.attrNames (builtins.getFlake "'
+        .. flake_path
+        .. '").outputs.packages.${builtins.currentSystem}',
+      '--impure',
+      '--json',
+    },
+    json = true,
+  })
 end
 
-return nixessitycore
+return setmetatable({ flake_output = flake_output }, {})

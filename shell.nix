@@ -5,6 +5,7 @@
 let
   lua = pkgs.luajit.withPackages (
     ps: with ps; [
+      luv
       lua-cjson
       sqlite
       busted
