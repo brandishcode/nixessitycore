@@ -1,12 +1,12 @@
 local json = require 'cjson'
 
----@class ExecutableOpts
+---@class SpawnOpts
 ---@field cmd string the executable
 ---@field args table the executable arguments
 
 ---Execute a process
----@param opts ExecutableOpts
-local function exec(opts)
+---@param opts SpawnOpts
+local function spawn(opts)
   local uv = require 'luv'
   local output_data = {}
   local output_error = {}
@@ -43,20 +43,32 @@ local function exec(opts)
   return output_data, output_error, code, signal
 end
 
+local next = next
+
+---@class ProcessOpts:SpawnOpts
+---@field to_json? boolean The resulting output data is converted to json
+---@field to_string? boolean The resulting output data is converted to string
+---@field placeholders? { [string]: string } When using placeholders make sure the target placeholder is enclosed between two '%' symbols
+
 ---@class Process
 ---@field exec fun(opts: ProcessOpts): string|table Execute the executable
----
----@class ProcessOpts:ExecutableOpts
----@field json? boolean The resulting output data is json convertable
----
----@type Process
 local M = {
   ---@param opts ProcessOpts
   ---@return string|table # The executable output data
   exec = function(opts)
-    local data, err, code, signal = exec(opts)
-    if opts.json then
+    if opts.placeholders ~= nil and next(opts.placeholders) ~= nil then
+      for pattern, repl in pairs(opts.placeholders) do
+        for i, v in ipairs(opts.args) do
+          opts.args[i] = string.gsub(v, '%%' .. pattern .. '%%', repl)
+        end
+      end
+    end
+    local data, err, code, signal = spawn(opts)
+    if opts.to_json then
       return json.decode(table.concat(data))
+    elseif opts.to_string then
+      local trimmed = string.gsub(table.concat(data), "%s+", "")
+      return trimmed
     else
       return data
     end
