@@ -6,12 +6,14 @@ local function flake_output(flake_path)
     args = {
       'eval',
       '--expr',
-      'builtins.attrNames (builtins.getFlake "%flake_path%").outputs.packages.${builtins.currentSystem}',
+      string.format(
+        'builtins.attrNames (builtins.getFlake "%s").outputs.packages.${builtins.currentSystem}',
+        abs_path
+      ),
       '--impure',
       '--json',
     },
     to_json = true,
-    placeholders = { flake_path = abs_path },
   })
 end
 
