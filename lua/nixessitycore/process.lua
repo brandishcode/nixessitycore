@@ -9,6 +9,7 @@ local json = require 'cjson'
 ---Execute a process
 ---@param opts SpawnOpts
 local function spawn(opts)
+  ---@type uv
   local uv = require 'luv'
   local output_data = {}
   local output_error = {}
@@ -30,6 +31,7 @@ local function spawn(opts)
   end
   local proc_handle, pid = uv.spawn(
     opts.cmd,
+    ---@diagnostic disable-next-line
     { args = opts.args, stdio = { nil, stdout, stderr } },
 
     ---Process on exit callback
@@ -41,6 +43,7 @@ local function spawn(opts)
 
   ---Process stdout listener
   if not opts.inherit_stdout then
+    ---@diagnostic disable-next-line
     uv.read_start(stdout, function(err, data)
       assert(not err, err)
       table.insert(output_data, data)
@@ -49,6 +52,7 @@ local function spawn(opts)
 
   ---Process stderr listener
   if not opts.inherit_stderr then
+    ---@diagnostic disable-next-line
     uv.read_start(stderr, function(err, data)
       assert(not err, err)
       table.insert(output_error, data)
