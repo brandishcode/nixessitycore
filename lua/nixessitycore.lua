@@ -14,6 +14,7 @@ local function flake_output(flake_path)
       '--json',
     },
     to_json = true,
+    inherit_stderr = true,
   })
 end
 

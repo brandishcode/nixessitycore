@@ -3,6 +3,8 @@ local json = require 'cjson'
 ---@class SpawnOpts
 ---@field cmd string the executable
 ---@field args table the executable arguments
+---@field inherit_stderr boolean to inherit the parent stderr
+---@field inherit_stdout boolean to inherit the parent stdout
 
 ---Execute a process
 ---@param opts SpawnOpts
@@ -14,8 +16,18 @@ local function spawn(opts)
   local signal = nil
 
   ---Spawn a child process
-  local stdout = uv.new_pipe()
-  local stderr = uv.new_pipe()
+  local stdout
+  if opts.inherit_stdout then
+    stdout = 1
+  else
+    stdout = uv.new_pipe()
+  end
+  local stderr
+  if opts.inherit_stderr then
+    stderr = 2
+  else
+    stderr = uv.new_pipe()
+  end
   local proc_handle, pid = uv.spawn(
     opts.cmd,
     { args = opts.args, stdio = { nil, stdout, stderr } },
@@ -28,19 +40,23 @@ local function spawn(opts)
   )
 
   ---Process stdout listener
-  uv.read_start(stdout, function(err, data)
-    assert(not err, err)
-    table.insert(output_data, data)
-  end)
+  if not opts.inherit_stdout then
+    uv.read_start(stdout, function(err, data)
+      assert(not err, err)
+      table.insert(output_data, data)
+    end)
+  end
 
   ---Process stderr listener
-  uv.read_start(stderr, function(err, data)
-    assert(not err, err)
-    table.insert(output_error, data)
-  end)
+  if not opts.inherit_stderr then
+    uv.read_start(stderr, function(err, data)
+      assert(not err, err)
+      table.insert(output_error, data)
+    end)
+  end
 
   uv.run()
-  return output_data, output_error, code, signal
+  return code, signal, output_data, output_error
 end
 
 ---@class ProcessOpts:SpawnOpts
@@ -53,11 +69,11 @@ local M = {
   ---@param opts ProcessOpts
   ---@return string|table # The executable output data
   exec = function(opts)
-    local data, err, code, signal = spawn(opts)
+    local code, signal, data, err = spawn(opts)
     if opts.to_json then
       return json.decode(table.concat(data))
     elseif opts.to_string then
-      local trimmed = string.gsub(table.concat(data), "%s+", "")
+      local trimmed = string.gsub(table.concat(data), '%s+', '')
       return trimmed
     else
       return data
