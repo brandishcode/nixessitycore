@@ -15,21 +15,46 @@ local function abs_path(path)
   return string.gsub(table.concat(output), '%s+', '')
 end
 
-local function flake_packages(flake_path)
+---@class FlakeOpts
+---@field is_impure? boolean whether the flake is impure
+---@field is_relative_path? boolean whether the flake path passed is a relative one
+
+---@param flake_path string
+---@param opts FlakeOpts
+local function flake_packages(flake_path, opts)
+  local path = flake_path
   local output = {}
   local process = require 'nixessitycore.process'
+
+  local is_relative_path = false
+  local is_impure = false
+
+  if opts ~= nil then
+    is_impure = opts.is_impure
+    is_relative_path = opts.is_relative_path
+  end
+
+  if is_relative_path then
+    path = abs_path(path)
+  end
+
+  local args = {
+    'eval',
+    '--expr',
+    string.format(
+      'builtins.attrNames (builtins.getFlake "%s").outputs.packages.${builtins.currentSystem}',
+      path
+    ),
+    '--json',
+  }
+
+  if is_impure then
+    table.insert(args, '--impure')
+  end
+
   process({
     cmd = 'nix',
-    args = {
-      'eval',
-      '--expr',
-      string.format(
-        'builtins.attrNames (builtins.getFlake "%s").outputs.packages.${builtins.currentSystem}',
-        abs_path(flake_path)
-      ),
-      '--impure',
-      '--json',
-    },
+    args = args,
     listeners = {
       on_stdout = function(_, data)
         table.insert(output, data)
