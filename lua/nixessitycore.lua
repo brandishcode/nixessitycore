@@ -15,7 +15,7 @@ local function abs_path(path)
   return string.gsub(table.concat(output), '%s+', '')
 end
 
-local function flake_output(flake_path)
+local function flake_packages(flake_path)
   local output = {}
   local process = require 'nixessitycore.process'
   process({
@@ -39,4 +39,4 @@ local function flake_output(flake_path)
   return json.decode(table.concat(output))
 end
 
-return setmetatable({ flake_output = flake_output }, {})
+return setmetatable({ flake_packages = flake_packages }, {})

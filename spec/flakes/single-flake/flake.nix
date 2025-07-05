@@ -10,5 +10,6 @@
     {
 
       packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
+      packages.x86_64-linux.cowsay = nixpkgs.legacyPackages.x86_64-linux.cowsay;
     };
 }
