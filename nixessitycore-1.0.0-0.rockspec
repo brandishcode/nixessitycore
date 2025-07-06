@@ -1,9 +1,9 @@
 rockspec_format = "3.0"
 package = "nixessitycore"
-version = "main-0"
+version = "1.0.0-0"
 source = {
    url = "git://github.com/brandishcode/nixessitycore.git",
-   tag = "main"
+   tag = "v1.0.0-alpha"
 }
 description = {
    summary = "Pure lua wrappers for nix commands.",
