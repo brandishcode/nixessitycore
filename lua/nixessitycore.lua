@@ -36,7 +36,7 @@ end
 ---@class GitFlake
 ---@field owner string
 ---@field repo string
----@field rev string
+---@field rev? string
 ---@field system System
 
 ---@param flake_path string|GitFlake
