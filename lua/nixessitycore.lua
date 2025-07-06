@@ -21,6 +21,7 @@ end
 
 ---@param flake_path string
 ---@param opts FlakeOpts
+---@return string[] # the available packages
 local function flake_packages(flake_path, opts)
   local path = flake_path
   local output = {}
