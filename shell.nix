@@ -13,8 +13,12 @@ let
   );
 in
 pkgs.mkShell {
-  packages = [ lua ];
+  packages = [
+    lua
+    pkgs.luarocks
+  ];
   shellHook = ''
+    export SHELL=/run/current-system/sw/bin/bash
     export LUA_PATH="$PATH;./lua/?.lua"
   '';
 }
