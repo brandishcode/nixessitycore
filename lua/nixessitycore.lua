@@ -25,33 +25,48 @@ end
 ---| 'store' store in table (used for testing to check whether expected error is correct)
 
 ---@class FlakeOpts
----@field impure? boolean whether the flake is impure
----@field is_relative_path? boolean whether the flake path passed is a relative one
 ---@field mode? PackageMode defaults to `list'
 ---@field pkg? string the package to build if in 'build' mode
 ---@field debug_mode? DebugMode defaults to 'none'
 
----@param flake_path string
----@param opts FlakeOpts
+---@alias System
+---| 'x86_64-linux'
+---| 'aarch64-darwin'
+
+---@class GitFlake
+---@field owner string
+---@field repo string
+---@field rev string
+---@field system System
+
+---@param flake_path string|GitFlake
+---@param opts? FlakeOpts
 ---@return string[]|nil # the available packages
 ---@return string[]|nil # the debug output
 local function flake_packages(flake_path, opts)
   local path = flake_path
+  local system = '${builtins.currentSystem}'
   local output = {}
   local process = require 'nixessitycore.process'
 
-  local is_relative_path = false
-  local impure = false
+  local impure = true
   local debug_mode = 'none'
 
   if opts ~= nil then
-    impure = opts.impure
-    is_relative_path = opts.is_relative_path
     debug_mode = opts.debug_mode
   end
 
-  if is_relative_path then
+  if type(path) == 'string' then
     path = abs_path(path)
+  else
+    if path.rev == nil or path.rev == '' then
+      system = path.system
+      path = string.format('github:%s/%s', path.owner, path.repo)
+    else
+      system = path.system
+      path = string.format('github:%s/%s?rev=%s', path.owner, path.repo, path.rev)
+      impure = false
+    end
   end
 
   local args = {
@@ -60,14 +75,11 @@ local function flake_packages(flake_path, opts)
     '--expr',
   }
 
-  if opts == nil or (opts ~= nil and opts.mode == 'build') then
+  if opts ~= nil and opts.mode == 'build' then
   else
     table.insert(
       args,
-      string.format(
-        'builtins.attrNames (builtins.getFlake "%s").outputs.packages.${builtins.currentSystem}',
-        path
-      )
+      string.format('builtins.attrNames (builtins.getFlake "%s").outputs.packages.%s', path, system)
     )
   end
 
