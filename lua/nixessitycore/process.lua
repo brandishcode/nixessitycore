@@ -31,14 +31,6 @@ local function spawn(opts)
     on_exit = opts.listeners.on_exit
   end
 
-  if on_stdout == nil then
-    on_stdout = 'parent'
-  end
-
-  if on_stderr == nil then
-    on_stderr = 'parent'
-  end
-
   ---Spawn a child process
   local stdout
   if on_stdout == 'parent' then
@@ -62,13 +54,13 @@ local function spawn(opts)
   )
 
   ---Process stdout listener
-  if on_stdout ~= 'parent' then
+  if on_stdout ~= nil then
     ---@diagnostic disable-next-line
     uv.read_start(stdout, on_stdout)
   end
 
   ---Process stderr listener
-  if on_stderr ~= 'parent' then
+  if on_stderr ~= nil then
     ---@diagnostic disable-next-line
     uv.read_start(stderr, on_stderr)
   end
