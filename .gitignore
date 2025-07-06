@@ -1,2 +1,5 @@
 # nix direnv folder
 .direnv
+
+# lua rocks
+**.src.rock
