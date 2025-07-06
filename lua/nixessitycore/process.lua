@@ -54,13 +54,13 @@ local function spawn(opts)
   )
 
   ---Process stdout listener
-  if on_stdout ~= nil then
+  if on_stdout ~= nil and on_stdout ~= 'parent' then
     ---@diagnostic disable-next-line
     uv.read_start(stdout, on_stdout)
   end
 
   ---Process stderr listener
-  if on_stderr ~= nil then
+  if on_stderr ~= nil and on_stderr ~= 'parent' then
     ---@diagnostic disable-next-line
     uv.read_start(stderr, on_stderr)
   end
