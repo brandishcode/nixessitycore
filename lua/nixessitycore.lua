@@ -1,23 +1,8 @@
-local json = require 'cjson'
-
-local function abs_path(path)
-  local output = {}
-  local process = require 'nixessitycore.process'
-  process({
-    cmd = 'readlink',
-    args = { '-f', path },
-    listeners = {
-      on_stdout = function(_, data)
-        table.insert(output, data)
-      end,
-    },
-  })
-  return string.gsub(table.concat(output), '%s+', '')
-end
-
+--[[ Data types - start ]]
 ---@alias PackageMode
 ---| 'list' list the available packages
 ---| 'build' build a package from the flake
+---| 'link' build a package from the flake with link
 
 ---@alias DebugMode
 ---| 'none'
@@ -27,6 +12,7 @@ end
 ---@class FlakeOpts
 ---@field mode? PackageMode defaults to `list'
 ---@field pkg? string the package to build if in 'build' mode
+---@field pkg_link string the output link of the built package
 ---@field debug_mode? DebugMode defaults to 'none'
 
 ---@alias System
@@ -38,49 +24,87 @@ end
 ---@field repo string
 ---@field rev? string
 ---@field system System
+--[[ Data types - end ]]
+
+local json = require 'cjson'
+local abs_path = require 'utils'.abs_path
+
+---@param flake_path string|GitFlake
+---@return string # the flake path
+---@return string # the system to be used
+---@return boolean # whether target flake is impure or not
+local function create_flake_attrs(flake_path)
+  local path, system, impure
+  if type(flake_path) == 'string' then
+    path = abs_path(flake_path)
+    impure = true
+    system = '${builtins.currentSystem}'
+  else
+    system = flake_path.system
+    if flake_path.rev == nil or flake_path.rev == '' then
+      path = string.format('github:%s/%s', flake_path.owner, flake_path.repo)
+      impure = true
+    else
+      path = string.format('github:%s/%s?rev=%s', flake_path.owner, flake_path.repo, flake_path.rev)
+      impure = false
+    end
+  end
+  return path, system, impure
+end
 
 ---@param flake_path string|GitFlake
 ---@param opts? FlakeOpts
----@return string[]|nil # the available packages
+---@return string|string[]|nil # the available packages
 ---@return string[]|nil # the debug output
 local function flake_packages(flake_path, opts)
-  local path = flake_path
-  local system = '${builtins.currentSystem}'
   local output = {}
   local process = require 'nixessitycore.process'
-
-  local impure = true
+  local mode
+  local pkg
+  local pkg_link
   local debug_mode = 'none'
 
   if opts ~= nil then
     debug_mode = opts.debug_mode
+    mode = opts.mode
+    pkg = opts.pkg
+    pkg_link = opts.pkg_link
   end
 
-  if type(path) == 'string' then
-    path = abs_path(path)
-  else
-    if path.rev == nil or path.rev == '' then
-      system = path.system
-      path = string.format('github:%s/%s', path.owner, path.repo)
-    else
-      system = path.system
-      path = string.format('github:%s/%s?rev=%s', path.owner, path.repo, path.rev)
-      impure = false
+  local path, system, impure = create_flake_attrs(flake_path)
+
+  local args
+
+  if mode == 'build' then
+    args = {
+      'build',
+      '--json',
+      '--no-link',
+      '--expr',
+      string.format('(builtins.getFlake "%s").outputs.packages.%s.%s', path, system, pkg),
+    }
+  elseif mode == 'link' then
+    args = {
+      'build',
+      '--print-out-paths',
+      '--expr',
+      string.format('(builtins.getFlake "%s").outputs.packages.%s.%s', path, system, pkg),
+    }
+    if pkg_link ~= nil then
+      table.insert(args, '--out-link')
+      table.insert(args, pkg_link)
     end
-  end
-
-  local args = {
-    'eval',
-    '--json',
-    '--expr',
-  }
-
-  if opts ~= nil and opts.mode == 'build' then
   else
-    table.insert(
-      args,
-      string.format('builtins.attrNames (builtins.getFlake "%s").outputs.packages.%s', path, system)
-    )
+    args = {
+      'eval',
+      '--json',
+      '--expr',
+      string.format(
+        'builtins.attrNames (builtins.getFlake "%s").outputs.packages.%s',
+        path,
+        system
+      ),
+    }
   end
 
   if impure then
@@ -122,7 +146,11 @@ local function flake_packages(flake_path, opts)
       error('flake_packages: failed')
     end
   else
-    return json.decode(table.concat(output)), err_output
+    if mode == 'link' then
+      return table.concat(output), err_output
+    else
+      return json.decode(table.concat(output)), err_output
+    end
   end
 end
 
