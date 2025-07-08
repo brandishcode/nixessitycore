@@ -22,6 +22,7 @@
       {
         formatter = bcfmt.formatter.${system};
         devShells.default = import ./shell.nix { inherit pkgs; };
+        packages.default = import ./. { inherit pkgs; };
       }
     );
 }
