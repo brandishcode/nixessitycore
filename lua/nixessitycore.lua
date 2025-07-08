@@ -15,6 +15,9 @@
 ---@field pkg_link string the output link of the built package
 ---@field debug_mode? DebugMode defaults to 'none'
 
+---@class OutputOpts
+---@field to_string? boolean output to string
+
 ---@alias System
 ---| 'x86_64-linux'
 ---| 'aarch64-darwin'
@@ -54,9 +57,10 @@ end
 
 ---@param flake_path string|GitFlake
 ---@param opts? FlakeOpts
+---@param output_opts? OutputOpts
 ---@return string|string[]|nil # the available packages
 ---@return string[]|nil # the debug output
-local function flake_packages(flake_path, opts)
+local function flake_packages(flake_path, opts, output_opts)
   local output = {}
   local process = require 'nixessitycore.process'
   local mode
@@ -146,7 +150,7 @@ local function flake_packages(flake_path, opts)
       error('flake_packages: failed')
     end
   else
-    if mode == 'link' then
+    if mode == 'link' or (output_opts ~= nil and output_opts.to_string) then
       return table.concat(output), err_output
     else
       return json.decode(table.concat(output)), err_output
