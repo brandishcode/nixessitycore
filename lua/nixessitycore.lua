@@ -31,6 +31,7 @@
 
 local json = require 'cjson'
 local abs_path = require 'utils'.abs_path
+local assert_file = require 'utils'.assert_file
 
 ---@param flake_path string|GitFlake
 ---@return string # the flake path
@@ -40,6 +41,7 @@ local function create_flake_attrs(flake_path)
   local path, system, impure
   if type(flake_path) == 'string' then
     path = abs_path(flake_path)
+    assert_file(path .. '/flake.nix')
     impure = true
     system = '${builtins.currentSystem}'
   else
@@ -60,6 +62,7 @@ end
 ---@param output_opts? OutputOpts
 ---@return string|string[]|nil # the available packages
 ---@return string[]|nil # the debug output
+---@return number # the exit code
 local function flake_packages(flake_path, opts, output_opts)
   local output = {}
   local process = require 'nixessitycore.process'
@@ -145,15 +148,15 @@ local function flake_packages(flake_path, opts, output_opts)
 
   if ret_code ~= 0 then
     if debug_mode == 'store' then
-      return nil, err_output
+      return nil, err_output, ret_code
     else
       error('flake_packages: failed')
     end
   else
     if mode == 'link' or (output_opts ~= nil and output_opts.to_string) then
-      return table.concat(output), err_output
+      return table.concat(output), err_output, ret_code
     else
-      return json.decode(table.concat(output)), err_output
+      return json.decode(table.concat(output)), err_output, ret_code
     end
   end
 end
