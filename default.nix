@@ -11,6 +11,7 @@ pkgs.luaPackages.buildLuarocksPackage {
   propagatedBuildInputs = with pkgs.luaPackages; [
     luv
     lua-cjson
+    lua_cliargs
     lualogging
     ansicolors
   ];
