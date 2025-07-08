@@ -3,11 +3,10 @@
 }:
 
 let
-  lua = pkgs.luajit.withPackages (
+  lua = pkgs.lua5_4.withPackages (
     ps: with ps; [
       luv
       lua-cjson
-      sqlite
       busted
     ]
   );
