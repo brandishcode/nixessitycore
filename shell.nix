@@ -8,6 +8,8 @@ let
       luv
       lua-cjson
       busted
+      lualogging
+      ansicolors
     ]
   );
 in
