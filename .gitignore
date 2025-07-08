@@ -3,3 +3,6 @@
 
 # lua rocks
 **.src.rock
+
+# nix build output
+**/result
