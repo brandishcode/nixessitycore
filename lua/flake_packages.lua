@@ -27,7 +27,9 @@ if args ~= nil and args['debug'] then
   file_log = true
 end
 
-local log = require 'log'.default('flake_packages', show_debug, file_log)
+local appender = require 'appender'
+--appender.setup('flake_packages', show_debug, file_log)
+local log = appender.get_log()
 
 if not args and err then
   log:fatal('%s: %s', cli.name, err)
@@ -51,11 +53,11 @@ log:debug('flag local: %s', is_local)
 
 local flake_packages = require 'nixessitycore'.flake_packages
 
-local output = require 'log'.output
+local output = appender.get_output_log()
 
 local result, _, ret_code = flake_packages(flake_path, nil, { to_string = true })
 if not show_debug then
-  output(result)
+  output:info(result)
 end
 log:debug('exit with: %s; result: %s', ret_code, result)
 os.exit(ret_code)

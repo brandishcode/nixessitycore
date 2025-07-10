@@ -7,12 +7,18 @@ require 'logging.file'
 local log_dir = string.format('%s/.local/share/nixessitycore', os.getenv('HOME'))
 os.execute(string.format('mkdir -p %s', log_dir))
 
+local __appender
+local __output_appender
+
 return {
+  get_log = function()
+    assert(__appender, "call setup first: require 'appender'.setup()")
+    return __appender
+  end,
   ---@param name string the command name
   ---@param show_debug boolean whether to show debug logs or not
   ---@param file_log? boolean whether to log in a file
-  ---@return any # the logger
-  default = function(name, show_debug, file_log)
+  setup = function(name, show_debug, file_log)
     local level = log.FATAL
     if show_debug then
       level = log.DEBUG
@@ -40,19 +46,16 @@ return {
         },
       }
     end
-    return appender
-  end,
-  output = setmetatable({
-    log = log.console {
+    __appender = appender
+    __output_appender = log.console {
       logLevel = log.INFO,
       destination = 'stdout',
       logPatterns = {
         [log.INFO] = ansicolors('%{reset}%message'),
       },
-    },
-  }, {
-    __call = function(t, args)
-      t.log:info(args)
-    end,
-  }),
+    }
+  end,
+  get_output_log = function()
+    return __output_appender
+  end,
 }

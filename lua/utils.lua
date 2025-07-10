@@ -1,15 +1,17 @@
 require 'nixessitycore.process'
+local log = require 'appender'.get_log()
 
 local function assert_file(path)
   local f = io.open(path, 'r')
   if f == nil then
-    error(string.format('abs_path: invalid path (make sure the %s exists)', path))
+    log:fatal('abs_path: invalid path (make sure the %s exists)', path)
   else
     io.close(f)
   end
 end
 
 local function abs_path(path)
+  log:debug('get absolute path of %s', path)
   local output = {}
   local process = require 'nixessitycore.process'
   process({
