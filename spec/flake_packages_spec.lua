@@ -1,3 +1,5 @@
+require 'appender'.setup('flake_packages test', false, false)
+
 local nc = require 'nixessitycore'
 local delete_build_links = require 'test.build_links'.delete_build_links
 local create_build_links = require 'test.build_links'.create_build_links
