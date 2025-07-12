@@ -28,7 +28,7 @@ if args ~= nil and args['debug'] then
 end
 
 local appender = require 'appender'
---appender.setup('flake_packages', show_debug, file_log)
+appender.setup('flake_packages', show_debug, file_log)
 local log = appender.get_log()
 
 if not args and err then

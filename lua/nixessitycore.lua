@@ -32,6 +32,7 @@
 local json = require 'cjson'
 local abs_path = require 'utils'.abs_path
 local assert_file = require 'utils'.assert_file
+local log = require 'appender'.get_log()
 
 ---@param flake_path string|GitFlake
 ---@return string # the flake path
@@ -54,6 +55,7 @@ local function create_flake_attrs(flake_path)
       impure = false
     end
   end
+  log:debug('flake attributes; path: %s, system: %s, impure: %s', path, system, impure)
   return path, system, impure
 end
 
@@ -140,6 +142,7 @@ local function flake_packages(flake_path, opts, output_opts)
     end
   end
 
+  log:debug('cmd: nix; args: %s %s %s %s %s', table.unpack(args))
   process({
     cmd = 'nix',
     args = args,
