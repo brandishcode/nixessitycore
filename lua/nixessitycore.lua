@@ -142,7 +142,7 @@ local function flake_packages(flake_path, opts, output_opts)
     end
   end
 
-  log:debug('cmd: nix; args: %s %s %s %s %s', table.unpack(args))
+  log:debug('cmd: nix %s %s %s %s %s', table.unpack(args))
   process({
     cmd = 'nix',
     args = args,
