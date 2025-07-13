@@ -1,6 +1,5 @@
 {
   pkgs ? import <nixpkgs> { },
-  bc-core,
 }:
 
 let
@@ -12,12 +11,17 @@ let
       lua_cliargs
     ]
   );
+  sources = import ./npins;
+  bc-lua-core =
+    (builtins.getFlake "github:brandishcode/bc-lua-core?rev=${sources.bc-lua-core.revision}")
+    .packages.${pkgs.system}.default;
 in
 pkgs.mkShell {
   packages = [
+    pkgs.npins
     lua
     pkgs.luarocks
-    bc-core
+    bc-lua-core
   ];
   shellHook = ''
     export SHELL=/run/current-system/sw/bin/bash

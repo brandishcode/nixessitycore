@@ -1,0 +1,27 @@
+{
+  "pins": {
+    "bc-lua-core": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "brandishcode",
+        "repo": "bc-lua-core"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v1.0.0-alpha",
+      "revision": "65a26e066f5e27e97005aab3b2ddf82aaffd8076",
+      "url": "https://api.github.com/repos/brandishcode/bc-lua-core/tarball/v1.0.0-alpha",
+      "hash": "0yr82cijb8g7w37zxdvs57nfrn1cznh7kv8vqpsd399vd7k8a4qa"
+    },
+    "nixpkgs": {
+      "type": "Channel",
+      "name": "nixpkgs-unstable",
+      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre827015.2a2130494ad6/nixexprs.tar.xz",
+      "hash": "03y2pli0a4dq1s9dvycxnsgpsw2ncv5rap2f2psh6j4djb5gzvw0"
+    }
+  },
+  "version": 5
+}
