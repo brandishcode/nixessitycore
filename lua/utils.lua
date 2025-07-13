@@ -1,5 +1,5 @@
 require 'nixessitycore.process'
-local log = require 'appender'.get_log()
+local log = require 'bcappender'.get_log()
 
 local function assert_file(path)
   local f = io.open(path, 'r')

@@ -32,7 +32,7 @@
 local json = require 'cjson'
 local abs_path = require 'utils'.abs_path
 local assert_file = require 'utils'.assert_file
-local log = require 'appender'.get_log()
+local log = require 'bcappender'.get_log()
 
 ---@param flake_path string|GitFlake
 ---@return string # the flake path

@@ -1,5 +1,6 @@
 {
   pkgs ? import <nixpkgs> { },
+  bc-core,
 }:
 
 pkgs.luaPackages.buildLuarocksPackage {
@@ -12,7 +13,6 @@ pkgs.luaPackages.buildLuarocksPackage {
     luv
     lua-cjson
     lua_cliargs
-    lualogging
-    ansicolors
+    bc-core
   ];
 }

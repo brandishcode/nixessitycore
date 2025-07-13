@@ -27,8 +27,8 @@ if args ~= nil and args['debug'] then
   file_log = true
 end
 
-local appender = require 'appender'
-appender.setup('flake_packages', show_debug, file_log)
+local appender = require 'bcappender'
+appender.setup({ name = 'flake_packages', is_debug = show_debug, is_file_log = file_log })
 local log = appender.get_log()
 
 if not args and err then

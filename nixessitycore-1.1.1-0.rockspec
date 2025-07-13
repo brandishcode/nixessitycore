@@ -1,9 +1,9 @@
 rockspec_format = "3.0"
 package = "nixessitycore"
-version = "1.1.0-0"
+version = "1.1.1-0"
 source = {
    url = "git://github.com/brandishcode/nixessitycore.git",
-   tag = "v1.1.0-0"
+   tag = "v1.1.1-0"
 }
 description = {
    summary = "Pure lua wrappers for nix commands.",
@@ -15,15 +15,12 @@ dependencies = {
   "luv >= 1.51.0-1",
   "lua-cjson >= 2.1.0",
   "lua_cliargs >= 3.0.2",
-  "lualogging >= 1.8.2",
-  "ansicolors >= 1.0.2-3"
+  "bc-lua-core"
 }
 build = {
    type = "builtin",
    modules = {
       nixessitycore = "lua/nixessitycore.lua",
-      ["nixessitycore.process"] = "lua/nixessitycore/process.lua",
-      ["nixessitycore.utils"] = "lua/utils.lua"
    },
    install = {
      bin = {

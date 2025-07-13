@@ -1,5 +1,6 @@
 {
   pkgs ? import <nixpkgs> { },
+  bc-core,
 }:
 
 let
@@ -9,8 +10,6 @@ let
       lua-cjson
       busted
       lua_cliargs
-      lualogging
-      ansicolors
     ]
   );
 in
@@ -18,6 +17,7 @@ pkgs.mkShell {
   packages = [
     lua
     pkgs.luarocks
+    bc-core
   ];
   shellHook = ''
     export SHELL=/run/current-system/sw/bin/bash
