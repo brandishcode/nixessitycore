@@ -62,7 +62,7 @@ end
 ---@return number # the exit code
 local function flake_packages(flake_path, opts)
   local output = {}
-  local process = require 'nixessitycore.process'
+  local process = require 'bcprocess'
   local mode
   local pkg
   local pkg_link

@@ -1,9 +1,9 @@
 rockspec_format = "3.0"
 package = "nixessitycore"
-version = "1.1.2-0"
+version = "1.1.3-0"
 source = {
    url = "git://github.com/brandishcode/nixessitycore.git",
-   tag = "v1.1.2-0"
+   tag = "v1.1.3-0"
 }
 description = {
    summary = "Pure lua wrappers for nix commands.",
@@ -12,7 +12,6 @@ description = {
    license = "MIT"
 }
 dependencies = {
-  "luv >= 1.51.0-1",
   "lua_cliargs >= 3.0.2",
   "bc-lua-core"
 }

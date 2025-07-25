@@ -3,19 +3,18 @@
 }:
 
 let
+  sources = import ./npins;
   bc-lua-core =
     (builtins.getFlake "github:brandishcode/bc-lua-core?rev=${sources.bc-lua-core.revision}")
     .packages.${pkgs.system}.default;
   lua = pkgs.lua.withPackages (
     ps: with ps; [
-      luv
       lua-cjson
       busted
       lua_cliargs
     ]
   );
-  sources = import ./npins;
-
+  luaPath = "${bc-lua-core}/share/lua/${pkgs.lib.versions.major pkgs.lua.version}.${pkgs.lib.versions.minor pkgs.lua.version}/?.lua";
 in
 pkgs.mkShell {
   packages = [
@@ -26,6 +25,6 @@ pkgs.mkShell {
   ];
   shellHook = ''
     export SHELL=/run/current-system/sw/bin/bash
-    export LUA_PATH="$PATH;./lua/?.lua;${bc-lua-core}/share/lua/${pkgs.lua.version}/?.lua"
+    export LUA_PATH="$PATH;./lua/?.lua;${luaPath}"
   '';
 }

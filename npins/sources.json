@@ -11,10 +11,10 @@
       "version_upper_bound": null,
       "release_prefix": null,
       "submodules": false,
-      "version": "v1.0.0-alpha",
-      "revision": "65a26e066f5e27e97005aab3b2ddf82aaffd8076",
-      "url": "https://api.github.com/repos/brandishcode/bc-lua-core/tarball/v1.0.0-alpha",
-      "hash": "0yr82cijb8g7w37zxdvs57nfrn1cznh7kv8vqpsd399vd7k8a4qa"
+      "version": "v1.1.0-alpha",
+      "revision": "3dfd12e259b07bd767a3fa8957254ded24e5e5b7",
+      "url": "https://api.github.com/repos/brandishcode/bc-lua-core/tarball/v1.1.0-alpha",
+      "hash": "1f2p7h3hfydh03d6llilvpws1y7x793pxpdscnbz2w6yp6j5w313"
     },
     "nixpkgs": {
       "type": "Channel",
