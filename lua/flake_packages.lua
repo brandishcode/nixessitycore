@@ -55,7 +55,7 @@ local flake_packages = require 'nixessitycore'.flake_packages
 
 local output = appender.get_output_log()
 
-local result, _, ret_code = flake_packages(flake_path, nil, { to_string = true })
+local result, _, ret_code = flake_packages(flake_path, nil)
 if not show_debug then
   output:info(result)
 end

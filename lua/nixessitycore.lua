@@ -15,9 +15,6 @@
 ---@field pkg_link string the output link of the built package
 ---@field debug_mode? DebugMode defaults to 'none'
 
----@class OutputOpts
----@field to_string? boolean output to string
-
 ---@alias System
 ---| 'x86_64-linux'
 ---| 'aarch64-darwin'
@@ -29,7 +26,6 @@
 ---@field system System
 --[[ Data types - end ]]
 
-local json = require 'cjson'
 local abs_path = require 'utils'.abs_path
 local assert_file = require 'utils'.assert_file
 local log = require 'bcappender'.get_log()
@@ -61,11 +57,10 @@ end
 
 ---@param flake_path string|GitFlake
 ---@param opts? FlakeOpts
----@param output_opts? OutputOpts
 ---@return string|string[]|nil # the available packages
 ---@return string[]|nil # the debug output
 ---@return number # the exit code
-local function flake_packages(flake_path, opts, output_opts)
+local function flake_packages(flake_path, opts)
   local output = {}
   local process = require 'nixessitycore.process'
   local mode
@@ -156,11 +151,7 @@ local function flake_packages(flake_path, opts, output_opts)
       error('flake_packages: failed')
     end
   else
-    if mode == 'link' or (output_opts ~= nil and output_opts.to_string) then
-      return table.concat(output), err_output, ret_code
-    else
-      return json.decode(table.concat(output)), err_output, ret_code
-    end
+    return table.concat(output), err_output, ret_code
   end
 end
 
