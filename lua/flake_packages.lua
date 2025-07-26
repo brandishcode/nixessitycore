@@ -9,6 +9,7 @@ cli:argument('FLAKE_PATH', 'path to flake; can be absolute or relative path')
 cli:option('--owner=GIT_REPOSITORY_OWNER', 'git repository owner', nil)
 cli:option('--repo=GIT_REPOSITORY', 'git repository', nil)
 cli:option('--rev=GIT_REPOSITORY_REVISION', 'git repository', nil)
+cli:option('-b, --build=PACKAGE', 'package to build from flake outputs.packages', nil)
 
 -- flags
 cli:flag('-v, --verbose', 'output debug logs')
@@ -27,6 +28,11 @@ end
 local file_log = false
 if args ~= nil and args['debug'] then
   file_log = true
+end
+
+local build_package = nil
+if args ~= nil and args['b'] then
+  build_package = args['b']
 end
 
 local appender = require 'bcappender'
@@ -51,16 +57,22 @@ local flake_path = args['FLAKE_PATH']
 log:debug('argument FLAKE_PATH: %s', flake_path)
 log:debug('option owner: %s', owner)
 log:debug('option repo: %s', repo)
+log:debug('option build: %s', build_package)
 log:debug('flag local: %s', is_local)
 
 local flake_packages = require 'nixessitycore'.flake_packages
 
 local output = appender.get_output_log()
 
-local flake_opt = { debug_mode = 'none' }
+local flake_opt = { mode = 'list', debug_mode = 'none' }
 
 if show_debug then
   flake_opt.debug_mode = 'store'
+end
+
+if build_package ~= nil then
+  flake_opt.mode = 'build'
+  flake_opt.pkg = build_package
 end
 
 local result, err_result, ret_code = flake_packages(flake_path, flake_opt)
@@ -68,7 +80,7 @@ if not show_debug then
   output:info(result)
 end
 if err_result ~= nil then
-  for _,v in ipairs(err_result) do
+  for _, v in ipairs(err_result) do
     log:error(v)
   end
 end
