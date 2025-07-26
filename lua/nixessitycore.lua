@@ -12,7 +12,7 @@
 ---@class FlakeOpts
 ---@field mode? PackageMode defaults to `list'
 ---@field pkg? string the package to build if in 'build' mode
----@field pkg_link string the output link of the built package
+---@field pkg_link? string the output link of the built package
 ---@field debug_mode? DebugMode defaults to 'none'
 
 ---@alias System
