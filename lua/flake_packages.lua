@@ -60,12 +60,17 @@ local output = appender.get_output_log()
 local flake_opt = { debug_mode = 'none' }
 
 if show_debug then
-  flake_opt.debug_mode = 'show'
+  flake_opt.debug_mode = 'store'
 end
 
-local result, _, ret_code = flake_packages(flake_path, flake_opt)
+local result, err_result, ret_code = flake_packages(flake_path, flake_opt)
 if not show_debug then
   output:info(result)
+end
+if err_result ~= nil then
+  for _,v in ipairs(err_result) do
+    log:error(v)
+  end
 end
 log:debug('exit with: %s; result: %s', ret_code, result)
 os.exit(ret_code)
