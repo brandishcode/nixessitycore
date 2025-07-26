@@ -17,9 +17,11 @@ cli:flag('-f, --local', 'flake is local')
 
 local args, err = cli:parse(arg)
 
+local level = 'info'
 local show_debug = false
 if args ~= nil and args['v'] then
   show_debug = args['v']
+  level = 'debug'
 end
 
 local file_log = false
@@ -28,7 +30,7 @@ if args ~= nil and args['debug'] then
 end
 
 local appender = require 'bcappender'
-appender.setup({ name = 'flake_packages', is_debug = show_debug, is_file_log = file_log })
+appender.setup({ name = 'flake_packages', level = level, is_file_log = file_log })
 local log = appender.get_log()
 
 if not args and err then
