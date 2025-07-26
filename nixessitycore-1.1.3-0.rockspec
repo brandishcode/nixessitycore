@@ -22,7 +22,8 @@ build = {
    },
    install = {
      bin = {
-       flake_packages = "lua/flake_packages.lua"
+       flake_packages = "lua/flake_packages.lua",
+       flake_nixos = "lua/flake_nixos.lua"
      }
    }
 }

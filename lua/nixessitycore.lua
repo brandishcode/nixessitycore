@@ -15,6 +15,14 @@
 ---@field pkg_link? string the output link of the built package
 ---@field debug_mode? DebugMode defaults to 'none'
 
+---@alias NixosMode
+---| 'list' list the available usernames
+---| 'build' build the nixos configuration
+
+---@class NixosOpts
+---@field username string the username  of nixos configuration to build
+---@field mode? NixosMode defaults to 'list'
+
 ---@alias System
 ---| 'x86_64-linux'
 ---| 'aarch64-darwin'
@@ -155,4 +163,75 @@ local function flake_packages(flake_path, opts)
   end
 end
 
-return setmetatable({ flake_packages = flake_packages }, {})
+---@param flake_path string
+---@param opts NixosOpts
+local function flake_nixos(flake_path, opts)
+  local output = {}
+  local err_output = {}
+  local process = require 'bcprocess'
+  local username
+  local mode
+  local cmd = 'nix'
+  local args
+  local listeners
+
+  local path, _, impure = create_flake_attrs(flake_path)
+
+  if opts ~= nil then
+    username = opts.username
+    mode = opts.mode
+  end
+
+  local ret_code = 1
+
+  if mode == nil then
+    mode = 'list'
+    args = {
+      'eval',
+      '--json',
+      '--expr',
+      string.format(
+        'builtins.attrNames (builtins.getFlake "%s").outputs.nixosConfigurations',
+        path
+      ),
+    }
+
+    if impure then
+      table.insert(args, '--impure')
+    end
+
+    listeners = {
+      on_stdout = function(_, data)
+        table.insert(output, data)
+      end,
+      on_exit = function(code)
+        ret_code = code
+      end,
+    }
+  else
+    cmd = 'nixos-rebuild'
+    args = {
+      'build',
+      '--flake',
+      path .. '#' .. username,
+    }
+  end
+
+  process({
+    cmd = cmd,
+    args = args,
+    listeners = listeners,
+  })
+
+  if ret_code ~= 0 then
+    -- if debug_mode == 'store' then
+    --   return nil, err_output, ret_code
+    -- else
+    --   error('flake_packages: failed')
+    -- end
+  else
+    return table.concat(output), err_output, ret_code
+  end
+end
+
+return setmetatable({ flake_packages = flake_packages, flake_nixos = flake_nixos }, {})
