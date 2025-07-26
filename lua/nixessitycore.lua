@@ -216,13 +216,15 @@ local function flake_nixos(flake_path, opts)
       path .. '#' .. username,
     }
     listeners = {
-      on_stdout = 'parent',
+      on_stderr = function(_, data)
+        log:debug(data)
+      end,
+      on_stdout = function(_, data)
+        table.insert(output, data)
+      end,
       on_exit = function(code)
         ret_code = code
       end,
-      on_stderr = function(_, data)
-        print(data)
-      end
     }
   end
 

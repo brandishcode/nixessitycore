@@ -8,13 +8,25 @@ cli:argument('FLAKE_PATH', 'path to flake; can be absolute or relative path')
 -- options
 cli:option('-b, --build=USERNAME', 'username of nixos configuration to build', nil)
 
+-- flags
+cli:flag('-v, --verbose', 'output debug logs')
+
 local args, err = cli:parse(arg)
 
+local level = 'info'
+local show_debug = false
+if args ~= nil and args['v'] then
+  show_debug = args['v']
+  level = 'debug'
+end
+
+
 local appender = require 'bcappender'
-appender.setup({ name = 'flake_packages', level = 'info', is_file_log = false })
+appender.setup({ name = 'flake_packages', level = level, is_file_log = false })
 local log = appender.get_log()
 
 if not args and err then
+  log:fatal('%s: %s', cli.name, err)
   os.exit(1)
 end
 
