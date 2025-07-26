@@ -6,7 +6,7 @@ cli:set_name('flake_nixos')
 cli:argument('FLAKE_PATH', 'path to flake; can be absolute or relative path')
 
 -- options
-cli:option('-u, --username=USERNAME', 'username of nixos configuration to build', nil)
+cli:option('-b, --build=USERNAME', 'username of nixos configuration to build', nil)
 
 local args, err = cli:parse(arg)
 
@@ -18,12 +18,21 @@ if not args and err then
   os.exit(1)
 end
 
-local username = args['u']
+local username = args['b']
 
 local flake_path = args['FLAKE_PATH']
 
 local flake_nixos = require 'nixessitycore'.flake_nixos
 
-local output = flake_nixos(flake_path, { username = username })
+local output = appender.get_output_log()
 
-print(output)
+local flake_opts = { mode = 'list' }
+
+if username ~= nil then
+  flake_opts.username = username
+  flake_opts.mode = 'build'
+end
+
+local result, err_result, ret_code = flake_nixos(flake_path, flake_opts)
+output:info(result)
+log:debug('exit with: %s; result: %s', ret_code, result)

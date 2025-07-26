@@ -215,6 +215,15 @@ local function flake_nixos(flake_path, opts)
       '--flake',
       path .. '#' .. username,
     }
+    listeners = {
+      on_stdout = 'parent',
+      on_exit = function(code)
+        ret_code = code
+      end,
+      on_stderr = function(_, data)
+        print(data)
+      end
+    }
   end
 
   process({
