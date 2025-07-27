@@ -1,4 +1,3 @@
-require 'nixessitycore.process'
 local log = require 'bcappender'.get_log()
 
 local function assert_file(path)
@@ -13,7 +12,7 @@ end
 local function abs_path(path)
   log:debug('get absolute path of %s', path)
   local output = {}
-  local process = require 'nixessitycore.process'
+  local process = require 'bcprocess'
   process({
     cmd = 'readlink',
     args = { '-f', path },
