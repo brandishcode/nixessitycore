@@ -18,10 +18,12 @@
 ---@alias NixosMode
 ---| 'list' list the available usernames
 ---| 'build' build the nixos configuration
+---| 'test' test the nixos configuration
 
 ---@class NixosOpts
 ---@field username string the username  of nixos configuration to build
 ---@field mode? NixosMode defaults to 'list'
+---@field debug_mode? DebugMode defaults to 'none'
 
 ---@alias System
 ---| 'x86_64-linux'
@@ -59,7 +61,6 @@ local function create_flake_attrs(flake_path)
       impure = false
     end
   end
-  log:debug('flake attributes; path: %s, system: %s, impure: %s', path, system, impure)
   return path, system, impure
 end
 
@@ -84,6 +85,7 @@ local function flake_packages(flake_path, opts)
   end
 
   local path, system, impure = create_flake_attrs(flake_path)
+  log:debug('flake attributes; path: %s, system: %s, impure: %s', path, system, impure)
 
   local args
 
@@ -165,27 +167,48 @@ end
 
 ---@param flake_path string
 ---@param opts NixosOpts
+---@return string|string[]|nil # output depending on the mode: (build|list)
+---@return string[]|nil # the debug output
+---@return number # the exit code
 local function flake_nixos(flake_path, opts)
   local output = {}
-  local err_output = {}
+  local err_output = nil
   local process = require 'bcprocess'
   local username
   local mode
   local cmd = 'nix'
   local args
   local listeners
+  local debug_mode = 'none'
 
   local path, _, impure = create_flake_attrs(flake_path)
+  log:debug('flake attributes; path: %s', path)
 
   if opts ~= nil then
     username = opts.username
     mode = opts.mode
+    debug_mode = opts.debug_mode
   end
+
+  if username == nil then
+    process({
+      cmd = 'whoami',
+      listeners = {
+        on_stdout = function(_, data)
+          if data ~= nil then
+            username = string.gsub(data, '%s+', '')
+          end
+        end,
+      },
+    })
+    log:debug('opts.username was nil; defaulting to %s', username)
+  end
+
+  log:debug('nixosConfigurations username: %s', username)
 
   local ret_code = 1
 
-  if mode == nil then
-    mode = 'list'
+  if mode == 'list' then
     args = {
       'eval',
       '--json',
@@ -209,16 +232,23 @@ local function flake_nixos(flake_path, opts)
       end,
     }
   else
-    cmd = 'nixos-rebuild'
-    args = {
-      'build',
-      '--flake',
-      path .. '#' .. username,
-    }
+    if mode == 'build' then
+      cmd = 'nixos-rebuild'
+      args = {
+        mode,
+        '--flake',
+        path .. '#' .. username,
+      }
+    else
+      cmd = 'sudo'
+      args = {
+        'nixos-rebuild',
+        mode,
+        '--flake',
+        path .. '#' .. username,
+      }
+    end
     listeners = {
-      on_stderr = function(_, data)
-        log:debug(data)
-      end,
       on_stdout = function(_, data)
         table.insert(output, data)
       end,
@@ -228,6 +258,15 @@ local function flake_nixos(flake_path, opts)
     }
   end
 
+  if debug_mode == 'show' then
+    listeners.on_stderr = 'parent'
+  elseif debug_mode == 'store' then
+    err_output = {}
+    listeners.on_stderr = function(_, data)
+      table.insert(err_output, data)
+    end
+  end
+
   process({
     cmd = cmd,
     args = args,
@@ -235,12 +274,13 @@ local function flake_nixos(flake_path, opts)
   })
 
   if ret_code ~= 0 then
-    -- if debug_mode == 'store' then
-    --   return nil, err_output, ret_code
-    -- else
-    --   error('flake_packages: failed')
-    -- end
+    if debug_mode == 'store' then
+      return nil, err_output, ret_code
+    else
+      error('flake_nixos: failed')
+    end
   else
+    err_output = nil
     return table.concat(output), err_output, ret_code
   end
 end

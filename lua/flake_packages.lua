@@ -18,6 +18,11 @@ cli:flag('-f, --local', 'flake is local')
 
 local args, err = cli:parse(arg)
 
+if not args and err then
+  error(string.format('%s: %s', cli.name, err))
+  os.exit(1)
+end
+
 local level = 'info'
 local show_debug = false
 if args ~= nil and args['v'] then
@@ -38,11 +43,6 @@ end
 local appender = require 'bcappender'
 appender.setup({ name = 'flake_packages', level = level, is_file_log = file_log })
 local log = appender.get_log()
-
-if not args and err then
-  log:fatal('%s: %s', cli.name, err)
-  os.exit(1)
-end
 
 local owner = args['owner']
 local repo = args['repo']
