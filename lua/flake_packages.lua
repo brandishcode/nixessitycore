@@ -62,8 +62,6 @@ log:debug('flag local: %s', is_local)
 
 local flake_packages = require 'nixessitycore'.flake_packages
 
-local output = appender.get_output_log()
-
 local flake_opt = { mode = 'list', debug_mode = 'none' }
 
 if show_debug then
@@ -77,7 +75,7 @@ end
 
 local result, err_result, ret_code = flake_packages(flake_path, flake_opt)
 if not show_debug then
-  output:info(result)
+  print(result)
 end
 if err_result ~= nil then
   for _, v in ipairs(err_result) do
